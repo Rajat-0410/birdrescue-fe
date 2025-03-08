@@ -37,14 +37,31 @@ interface FormData {
   dateFound: string;
 }
 
+interface SearchResult {
+  snippet: string;
+  url: string;
+}
+
+interface ProcessedBirdData {
+  description: string;
+  habitat: string;
+  treatment: string[];
+}
+
 // Web search function
-const webSearch = async (query: string): Promise<string[]> => {
+const webSearch = async (query: string): Promise<SearchResult[]> => {
   try {
     // In a real application, you would call an actual web search API
-    // This is a mock implementation
+    // This is a mock implementation that returns properly typed results
     return [
-      `The ${query.split(' ')[0]} is a common bird species found in urban areas...`,
-      `These birds typically inhabit gardens, parks, and woodland edges...`,
+      {
+        snippet: `The ${query.split(' ')[0]} is a common bird species found in urban areas...`,
+        url: 'https://example.com/birds/1'
+      },
+      {
+        snippet: `These birds typically inhabit gardens, parks, and woodland edges...`,
+        url: 'https://example.com/birds/2'
+      }
     ];
   } catch (error) {
     console.error('Web search error:', error);
@@ -53,30 +70,50 @@ const webSearch = async (query: string): Promise<string[]> => {
 };
 
 // Bird recognition API configuration
-const DRAGONEYE_API_KEY = process.env.NEXT_PUBLIC_DRAGONEYE_API_KEY || 'your_api_key';
-const API_ENDPOINT = 'https://api.dragoneye.ai/predict';
+const API_ENDPOINT = '/api/predict';
 
 // Function to identify bird species using AI
 const identifyBirdSpecies = async (imageFile: File): Promise<string> => {
   try {
     const formData = new FormData();
-    formData.append('image', imageFile);
-    formData.append('model_name', 'birds'); // Use appropriate model name
+    formData.append('image_file', imageFile);
 
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${DRAGONEYE_API_KEY}`,
-      },
       body: formData
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error:', errorText);
       throw new Error('Failed to identify bird species');
     }
 
     const data = await response.json();
-    return data.species || 'Unknown Species';
+    console.log('API Response:', data); // For debugging
+
+    if (data.predictions && data.predictions.length > 0) {
+      // Find the most confident prediction with a specific bird species
+      const speciesPrediction = data.predictions.find(
+        (pred: any) => pred.category.children?.length > 0
+      );
+
+      if (speciesPrediction) {
+        const birdSpecies = speciesPrediction.category.children[0];
+        const confidence = (birdSpecies.score * 100).toFixed(2);
+        return `${birdSpecies.displayName} (${confidence}% confidence)`;
+      }
+
+      // If no specific species found, return general bird detection
+      const birdPrediction = data.predictions.find(
+        (pred: any) => pred.category.score
+      );
+      if (birdPrediction) {
+        const confidence = (birdPrediction.category.score * 100).toFixed(2);
+        return `Bird (${confidence}% confidence)`;
+      }
+    }
+    return 'Unknown Species';
   } catch (error) {
     console.error('Error identifying bird:', error);
     return 'Unknown Species';
@@ -90,8 +127,8 @@ const getBirdInformation = async (species: string): Promise<Partial<BirdInfo>> =
     const results = await webSearch(searchQuery);
     
     // Process and extract relevant information from search results
-    const description = results[0] || '';
-    const habitat = results[1] || '';
+    const description = results[0]?.snippet || '';
+    const habitat = results[1]?.snippet || '';
     
     // Search for common issues and treatment
     const healthQuery = `${species} bird common health issues treatment rescue`;
@@ -111,7 +148,7 @@ const getBirdInformation = async (species: string): Promise<Partial<BirdInfo>> =
       'Contact a wildlife rehabilitator',
     ];
 
-    const treatment = healthResults.map(result => result.split('.')[0]).filter(Boolean);
+    const treatment = healthResults.map(result => result.snippet.split('.')[0]).filter(Boolean);
 
     return {
       species,
@@ -119,7 +156,7 @@ const getBirdInformation = async (species: string): Promise<Partial<BirdInfo>> =
       habitat,
       commonIssues,
       immediateActions,
-      treatment: treatment.slice(0, 5) // Take top 5 treatment suggestions
+      treatment: treatment.slice(0, 5)
     };
   } catch (error) {
     console.error('Error getting bird information:', error);
@@ -127,11 +164,23 @@ const getBirdInformation = async (species: string): Promise<Partial<BirdInfo>> =
   }
 };
 
+const processBirdSearchResults = (results: SearchResult[]): ProcessedBirdData => {
+  return {
+    description: results[0]?.snippet || '',
+    habitat: results[1]?.snippet || '',
+    treatment: [
+      'Keep the bird in a quiet, dark place',
+      'Maintain optimal temperature',
+      'Contact local wildlife rehabilitator',
+      'Avoid handling unnecessarily'
+    ]
+  };
+};
+
 export default function Contact() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [birdInfo, setBirdInfo] = useState<BirdInfo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<string[]>([]);
   
   // Form state with all fields
   const [formData, setFormData] = useState<FormData>({
@@ -163,12 +212,11 @@ export default function Contact() {
     localStorage.setItem('birdRescueFormData', JSON.stringify(formData));
   }, [formData]);
 
-  // Search for bird information using web search
+  // Update searchBirdInfo to be used in the component
   const searchBirdInfo = async (species: string) => {
     try {
       const searchQuery = `${species} bird identification characteristics treatment rescue`;
       const results = await webSearch(searchQuery);
-      setSearchResults(results);
       
       // Process search results to extract relevant information
       const birdData = processBirdSearchResults(results);
@@ -183,21 +231,6 @@ export default function Contact() {
     } catch (error) {
       console.error('Error searching bird information:', error);
     }
-  };
-
-  const processBirdSearchResults = (results: any) => {
-    // Extract relevant information from search results
-    // This is a simplified example - you would need to implement proper parsing
-    return {
-      description: results[0]?.snippet || '',
-      habitat: results[1]?.snippet || '',
-      treatment: [
-        'Keep the bird in a quiet, dark place',
-        'Maintain optimal temperature',
-        'Contact local wildlife rehabilitator',
-        'Avoid handling unnecessarily'
-      ]
-    };
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -517,28 +550,23 @@ export default function Contact() {
                 ) : birdInfo && (
                   <div className="bg-green-50 p-6 rounded-xl">
                     <h3 className="text-xl font-bold text-gray-800 mb-4">Bird Identification Results</h3>
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <p className="text-gray-700 mb-2">
-                          <span className="font-semibold">Species:</span> {birdInfo.species}
-                        </p>
-                        <p className="text-gray-700 mb-4">
-                          <span className="font-semibold">Scientific Name:</span> {birdInfo.scientificName}
-                        </p>
-                        {birdInfo.description && (
-                          <div className="mb-4">
-                            <h4 className="font-semibold text-gray-800 mb-2">Description:</h4>
-                            <p className="text-gray-700">{birdInfo.description}</p>
-                          </div>
-                        )}
+                    <div>
+                      <p className="text-gray-700 mb-2">
+                        <span className="font-semibold">Species:</span> {birdInfo.species}
+                      </p>
+                      {birdInfo.description && (
                         <div className="mb-4">
-                          <h4 className="font-semibold text-gray-800 mb-2">Common Issues:</h4>
-                          <ul className="list-disc list-inside text-gray-700 space-y-1">
-                            {birdInfo.commonIssues.map((issue, index) => (
-                              <li key={index}>{issue}</li>
-                            ))}
-                          </ul>
+                          <h4 className="font-semibold text-gray-800 mb-2">Description:</h4>
+                          <p className="text-gray-700">{birdInfo.description}</p>
                         </div>
+                      )}
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-gray-800 mb-2">Common Issues:</h4>
+                        <ul className="list-disc list-inside text-gray-700 space-y-1">
+                          {birdInfo.commonIssues.map((issue, index) => (
+                            <li key={index}>{issue}</li>
+                          ))}
+                        </ul>
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-800 mb-2">Emergency Care:</h4>
@@ -552,17 +580,17 @@ export default function Contact() {
                             </li>
                           ))}
                         </ul>
-                        {birdInfo.treatment && (
-                          <div className="mt-4">
-                            <h4 className="font-semibold text-gray-800 mb-2">Treatment Guidelines:</h4>
-                            <ul className="list-disc list-inside text-gray-700 space-y-1">
-                              {birdInfo.treatment.map((step, index) => (
-                                <li key={index}>{step}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
                       </div>
+                      {birdInfo.treatment && (
+                        <div className="mt-4">
+                          <h4 className="font-semibold text-gray-800 mb-2">Treatment Guidelines:</h4>
+                          <ul className="list-disc list-inside text-gray-700 space-y-1">
+                            {birdInfo.treatment.map((step, index) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -573,7 +601,7 @@ export default function Contact() {
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
-                  Bird's Condition
+                  Bird&apos;s Condition
                 </label>
                 <select
                   name="condition"

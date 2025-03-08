@@ -81,7 +81,7 @@ export default function FAQ() {
         <div className="mt-12 bg-green-50 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Still Have Questions?</h2>
           <p className="text-gray-600 mb-6">
-            Can't find the answer you're looking for? Please reach out to our team.
+            Can&apos;t find the answer you&apos;re looking for? Please reach out to our team.
           </p>
           <button className="bg-green-500 text-white px-6 py-3 rounded-full hover:bg-green-600 transition-colors duration-200">
             Contact Us
