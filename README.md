@@ -1,36 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🦜 Bird Rescue Website
 
-## Getting Started
+A modern, responsive website for bird rescue and rehabilitation services. Built with Next.js, TypeScript, and Tailwind CSS.
 
-First, run the development server:
+## 🌟 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 📱 Modern UI Components
+- Responsive design that works on all devices
+- Beautiful, nature-themed color scheme
+- Smooth animations and transitions
+- Interactive components and forms
+
+### 🔍 Key Pages
+1. **Home Page**
+   - Hero section with nature background
+   - Mission statement
+   - Key services overview
+   - Call-to-action sections
+
+2. **Contact & Report Page**
+   - Emergency contact banner
+   - Comprehensive bird rescue form
+   - AI-powered bird identification
+   - Real-time bird information and care instructions
+   - Image upload with preview
+   - Location tracking
+
+3. **Help Page**
+   - Emergency response guidelines
+   - Step-by-step rescue instructions
+   - Downloadable resources
+   - Common situations guide
+
+4. **Rescue Services**
+   - Professional services overview
+   - Success stories
+   - Rehabilitation process
+   - Volunteer opportunities
+
+5. **FAQ Page**
+   - Interactive Q&A section
+   - Common bird rescue questions
+   - Best practices
+   - Legal information
+
+## 🛠️ Technologies Used
+
+- **Frontend Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: Custom components
+- **Image Handling**: Next.js Image Optimization
+- **Form Handling**: React Hook Form (planned)
+- **Validation**: Zod (planned)
+- **Bird Identification**: AI Integration (planned)
+
+## 📋 Prerequisites
+
+- Node.js 18.17 or later
+- npm or yarn
+- Git
+
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/birdrescue-fe.git
+   cd birdrescue-fe
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` with your configuration:
+   ```
+   NEXT_PUBLIC_API_URL=your_api_url
+   NEXT_PUBLIC_BIRD_API_KEY=your_bird_api_key
+   ```
+
+4. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📁 Project Structure
+
+```
+birdrescue-fe/
+├── app/
+│   ├── components/     # Reusable UI components
+│   ├── contact/       # Contact and report form
+│   ├── help/          # Help and guidelines
+│   ├── rescue/        # Rescue services
+│   ├── faq/           # FAQ page
+│   ├── layout.tsx     # Root layout
+│   └── page.tsx       # Home page
+├── public/
+│   └── images/        # Static images
+├── styles/           # Global styles
+└── types/           # TypeScript types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔄 Planned Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- [ ] Integration with bird identification API
+- [ ] Form validation and error handling
+- [ ] User authentication for staff
+- [ ] Dashboard for tracking rescue cases
+- [ ] Real-time chat support
+- [ ] Multi-language support
+- [ ] Push notifications for emergency cases
+- [ ] Interactive bird species database
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-To learn more about Next.js, take a look at the following resources:
+## 📄 License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 👥 Team
 
-## Deploy on Vercel
+- Project Lead: [Your Name]
+- UI/UX Design: [Designer Name]
+- Frontend Development: [Developer Names]
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📞 Support
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For support, email help@birdrescue.org or join our Slack channel.
+
+## 🙏 Acknowledgments
+
+- Bird images from [Unsplash](https://unsplash.com)
+- Icons from [Heroicons](https://heroicons.com)
+- UI inspiration from modern nature conservation websites
